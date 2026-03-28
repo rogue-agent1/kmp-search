@@ -1,50 +1,25 @@
 #!/usr/bin/env python3
-"""kmp_search — Knuth-Morris-Pratt string matching. Zero deps."""
-
-def build_lps(pattern):
-    lps = [0] * len(pattern)
-    length, i = 0, 1
-    while i < len(pattern):
-        if pattern[i] == pattern[length]:
-            length += 1
-            lps[i] = length
-            i += 1
-        elif length:
-            length = lps[length - 1]
-        else:
-            i += 1
-    return lps
-
-def kmp_search(text, pattern):
-    if not pattern:
-        return list(range(len(text) + 1))
-    lps = build_lps(pattern)
-    matches = []
-    i = j = 0
-    while i < len(text):
-        if text[i] == pattern[j]:
-            i += 1
-            j += 1
-            if j == len(pattern):
-                matches.append(i - j)
-                j = lps[j - 1]
-        elif j:
-            j = lps[j - 1]
-        else:
-            i += 1
+"""KMP string matching algorithm."""
+import sys
+def kmp_table(pattern):
+    t=[0]*len(pattern);j=0
+    for i in range(1,len(pattern)):
+        while j>0 and pattern[i]!=pattern[j]: j=t[j-1]
+        if pattern[i]==pattern[j]: j+=1
+        t[i]=j
+    return t
+def kmp(text,pattern):
+    if not pattern: return []
+    t=kmp_table(pattern);j=0;matches=[]
+    for i in range(len(text)):
+        while j>0 and text[i]!=pattern[j]: j=t[j-1]
+        if text[i]==pattern[j]: j+=1
+        if j==len(pattern): matches.append(i-j+1);j=t[j-1]
     return matches
-
 def main():
-    text = "AABAACAADAABAABA"
-    pattern = "AABA"
-    lps = build_lps(pattern)
-    matches = kmp_search(text, pattern)
-    print(f"Text:    {text}")
-    print(f"Pattern: {pattern}")
-    print(f"LPS:     {lps}")
-    print(f"Matches at positions: {matches}")
-    for pos in matches:
-        print(f"  {' '*pos}{pattern}")
-
-if __name__ == "__main__":
-    main()
+    if "--demo" in sys.argv:
+        text="AABAACAADAABAABA"; pat="AABA"
+        m=kmp(text,pat)
+        print(f"Text: {text}\nPattern: {pat}\nMatches at: {m}")
+    elif len(sys.argv)>2: print(kmp(sys.argv[1],sys.argv[2]))
+if __name__=="__main__": main()
