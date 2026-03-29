@@ -1,10 +1,3 @@
-# kmp-search
-
-Single-file Python CLI. Zero dependencies.
-
-## Usage
-
-```bash
-python3 kmp_search.py
-python3 kmp_search.py test
-```
+# kmp_search
+KMP string search — O(n+m) pattern matching with failure function.
+Single-file Python, zero dependencies.
