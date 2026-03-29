@@ -1,11 +1,10 @@
 # kmp-search
 
-Knuth-Morris-Pratt string matching algorithm.
+Single-file Python CLI. Zero dependencies.
 
 ## Usage
 
 ```bash
+python3 kmp_search.py
 python3 kmp_search.py test
 ```
-
-Zero dependencies. Python 3.8+.
