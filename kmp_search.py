@@ -1,41 +1,56 @@
 #!/usr/bin/env python3
-"""kmp_search - Knuth-Morris-Pratt string search."""
-import argparse
+"""kmp_search - Knuth-Morris-Pratt string matching algorithm."""
+import sys
 
-def compute_lps(pattern: str) -> list:
-    lps = [0] * len(pattern)
-    length, i = 0, 1
-    while i < len(pattern):
+def build_lps(pattern):
+    m = len(pattern)
+    lps = [0] * m
+    length = 0
+    i = 1
+    while i < m:
         if pattern[i] == pattern[length]:
-            length += 1; lps[i] = length; i += 1
-        elif length: length = lps[length - 1]
-        else: lps[i] = 0; i += 1
+            length += 1
+            lps[i] = length
+            i += 1
+        else:
+            if length != 0:
+                length = lps[length - 1]
+            else:
+                lps[i] = 0
+                i += 1
     return lps
 
-def kmp_search(text: str, pattern: str) -> list:
-    if not pattern: return []
-    lps = compute_lps(pattern)
-    matches, i, j = [], 0, 0
+def kmp(text, pattern):
+    if not pattern:
+        return []
+    lps = build_lps(pattern)
+    results = []
+    i = j = 0
     while i < len(text):
         if text[i] == pattern[j]:
-            i += 1; j += 1
-            if j == len(pattern):
-                matches.append(i - j); j = lps[j - 1]
-        elif j: j = lps[j - 1]
-        else: i += 1
-    return matches
+            i += 1
+            j += 1
+        if j == len(pattern):
+            results.append(i - j)
+            j = lps[j - 1]
+        elif i < len(text) and text[i] != pattern[j]:
+            if j != 0:
+                j = lps[j - 1]
+            else:
+                i += 1
+    return results
 
-def main():
-    p = argparse.ArgumentParser(description="KMP string search")
-    p.add_argument("pattern"); p.add_argument("text", nargs="?")
-    p.add_argument("-f", "--file", help="Search in file")
-    args = p.parse_args()
-    if args.file: text = open(args.file).read()
-    elif args.text: text = args.text
-    else: import sys; text = sys.stdin.read()
-    matches = kmp_search(text, args.pattern)
-    print(f"Pattern: '{args.pattern}'")
-    print(f"Matches: {len(matches)} at positions {matches[:20]}")
+def test():
+    assert kmp("ABABDABACDABABCABAB", "ABABCABAB") == [10]
+    assert kmp("aaaaaa", "aa") == [0, 1, 2, 3, 4]
+    assert kmp("hello world", "xyz") == []
+    assert kmp("abcabc", "abc") == [0, 3]
+    lps = build_lps("AABAACAABAA")
+    assert lps == [0, 1, 0, 1, 2, 0, 1, 2, 3, 4, 5]
+    print("OK: kmp_search")
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] == "test":
+        test()
+    else:
+        print("Usage: kmp_search.py test")
